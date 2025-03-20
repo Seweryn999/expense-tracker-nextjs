@@ -1,24 +1,60 @@
-import { useState } from "react";
-import { db, auth } from "../lib/firebase";
-import { addDoc, collection } from "firebase/firestore";
+"use client";
 
-export default function ExpenseForm() {
+import { useState } from "react";
+import { db, auth, logTransaction } from "../lib/firebase";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+
+interface ExpenseFormProps {
+  onExpenseAdded: (newExpense: {
+    id: string;
+    amount: number;
+    category: string;
+    date: string;
+  }) => void;
+}
+
+export default function ExpenseForm({ onExpenseAdded }: ExpenseFormProps) {
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!auth.currentUser) return;
+    if (!auth.currentUser || !amount || !category) return;
 
-    await addDoc(collection(db, "expenses"), {
-      userId: auth.currentUser.uid,
-      amount: parseFloat(amount),
-      category,
-      createdAt: new Date(),
-    });
+    setLoading(true);
+    try {
+      const expenseRef = await addDoc(collection(db, "expenses"), {
+        userId: auth.currentUser.uid,
+        amount: parseFloat(amount),
+        category,
+        date: new Date().toISOString(),
+        timestamp: serverTimestamp(),
+      });
 
-    setAmount("");
-    setCategory("");
+      await logTransaction(
+        auth.currentUser.uid,
+        "add",
+        parseFloat(amount),
+        category
+      );
+
+      console.log("✅ Wydatek dodany, ID:", expenseRef.id);
+
+      onExpenseAdded({
+        id: expenseRef.id,
+        amount: parseFloat(amount),
+        category,
+        date: new Date().toISOString(),
+      });
+
+      setAmount("");
+      setCategory("");
+    } catch (error) {
+      console.error("❌ Błąd dodawania wydatku:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -29,16 +65,25 @@ export default function ExpenseForm() {
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
         className="p-2 border rounded w-full"
+        required
       />
-      <input
-        type="text"
-        placeholder="Kategoria"
+      <select
         value={category}
         onChange={(e) => setCategory(e.target.value)}
         className="p-2 border rounded w-full mt-2"
-      />
-      <button type="submit" className="p-2 bg-green-500 text-white w-full mt-2">
-        Dodaj wydatek
+        required
+      >
+        <option value="">Wybierz kategorię</option>
+        <option value="Jedzenie">🍔 Jedzenie</option>
+        <option value="Transport">🚗 Transport</option>
+        <option value="Rozrywka">🎮 Rozrywka</option>
+      </select>
+      <button
+        type="submit"
+        className="p-2 bg-green-500 text-white w-full mt-2"
+        disabled={loading}
+      >
+        {loading ? "Dodawanie..." : "Dodaj wydatek"}
       </button>
     </form>
   );
