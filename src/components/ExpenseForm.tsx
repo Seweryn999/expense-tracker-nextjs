@@ -1,5 +1,6 @@
 "use client";
 
+import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { db, auth, logTransaction } from "../lib/firebase";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
@@ -74,15 +75,16 @@ export default function ExpenseForm({ onExpenseAdded }: ExpenseFormProps) {
         required
       >
         <option value="">Wybierz kategorię</option>
-        <option value="Jedzenie">🍔 Jedzenie</option>
-        <option value="Transport">🚗 Transport</option>
-        <option value="Rozrywka">🎮 Rozrywka</option>
+        <option value="Jedzenie">Jedzenie 🍔</option>
+        <option value="Transport">Transport 🚗</option>
+        <option value="Rozrywka">Rozrywka 🎮</option>
       </select>
       <button
         type="submit"
-        className="p-2 bg-green-500 text-white w-full mt-2"
+        className="p-2 bg-green-500 flex items-center justify-center gap-2 text-white w-full mt-2"
         disabled={loading}
       >
+        <PlusCircleIcon className="h-5 w-5" />
         {loading ? "Dodawanie..." : "Dodaj wydatek"}
       </button>
     </form>

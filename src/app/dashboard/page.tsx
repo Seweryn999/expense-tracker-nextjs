@@ -2,10 +2,11 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { auth, db } from "../lib/firebase";
+import { auth, db } from "../../lib/firebase";
 import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
-import ExpenseChart from "../components/ExpenseChart";
-import ExpenseForm from "../components/ExpenseForm";
+import ExpenseChart from "../../components/ExpenseChart";
+import ExpenseForm from "../../components/ExpenseForm";
+import ExpenseList from "../../components/ExpenseList/ExpenseList";
 
 interface Expense {
   id: string;
@@ -33,7 +34,7 @@ export default function Dashboard() {
       try {
         q = query(q, orderBy("date", "desc"));
       } catch {
-        console.warn("⚠️ Brak indeksu, sortowanie zostanie pominięte.");
+        console.warn("⚠️ Brak indeksu, sortowanie pominięte.");
       }
 
       const snapshot = await getDocs(q);
@@ -70,6 +71,10 @@ export default function Dashboard() {
     setExpenses((prev) => [newExpense, ...prev]);
   };
 
+  const handleExpenseUpdated = (updatedExpenses: Expense[]) => {
+    setExpenses(updatedExpenses);
+  };
+
   return (
     <div className="container mx-auto text-center p-10">
       <h1 className="text-3xl font-bold mb-4">📊 Dashboard</h1>
@@ -78,7 +83,6 @@ export default function Dashboard() {
           <p className="text-lg mb-4">Witaj, {user.email}!</p>
 
           <ExpenseForm onExpenseAdded={handleExpenseAdded} />
-
           <ExpenseChart expenses={expenses} />
 
           <div className="mt-6 text-left">
@@ -88,18 +92,11 @@ export default function Dashboard() {
 
             {loading ? (
               <p className="text-gray-500">Ładowanie wydatków...</p>
-            ) : expenses.length > 0 ? (
-              <ul>
-                {expenses.map((expense) => (
-                  <li key={expense.id} className="border-b p-2">
-                    <span className="font-bold">{expense.category}:</span>{" "}
-                    {expense.amount} zł -{" "}
-                    {new Date(expense.date).toLocaleDateString()}
-                  </li>
-                ))}
-              </ul>
             ) : (
-              <p>Brak wydatków do wyświetlenia.</p>
+              <ExpenseList
+                expenses={expenses || []}
+                onExpensesChanged={handleExpenseUpdated}
+              />
             )}
           </div>
         </>

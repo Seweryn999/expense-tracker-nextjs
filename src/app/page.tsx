@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { auth } from "./lib/firebase";
+import { auth } from "../lib/firebase";
 
 export default function HomePage() {
   const router = useRouter();

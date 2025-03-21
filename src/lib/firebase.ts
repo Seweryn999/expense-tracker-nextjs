@@ -1,5 +1,12 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, onAuthStateChanged, User } from "firebase/auth";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+  User,
+} from "firebase/auth";
 import {
   getFirestore,
   collection,
@@ -24,7 +31,26 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
-export const saveUserToFirestore = async (user: User) => {
+export const signInWithGoogle = async () => {
+  const provider = new GoogleAuthProvider();
+  try {
+    const result = await signInWithPopup(auth, provider);
+    console.log("✅ Zalogowano jako:", result.user.email);
+  } catch (error) {
+    console.error("❌ Błąd logowania przez Google:", error);
+  }
+};
+
+export const logOut = async () => {
+  try {
+    await signOut(auth);
+    console.log("✅ Wylogowano");
+  } catch (error) {
+    console.error("❌ Błąd wylogowywania:", error);
+  }
+};
+
+export const saveUserToFirestore = async (user: User | null) => {
   if (!user) return;
   const userRef = doc(db, "users", user.uid);
   const userSnap = await getDoc(userRef);
@@ -38,12 +64,6 @@ export const saveUserToFirestore = async (user: User) => {
     console.log("✅ Użytkownik zapisany w Firestore:", user.email);
   }
 };
-
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    saveUserToFirestore(user);
-  }
-});
 
 export const logTransaction = async (
   userId: string,
@@ -67,3 +87,7 @@ export const logTransaction = async (
     console.error("❌ Błąd zapisu transakcji:", error);
   }
 };
+
+onAuthStateChanged(auth, (user) => {
+  saveUserToFirestore(user);
+});
