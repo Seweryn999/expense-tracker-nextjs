@@ -5,6 +5,7 @@ import {
   signInWithPopup,
   signOut,
   onAuthStateChanged,
+  signInAnonymously,
   User,
 } from "firebase/auth";
 import {
@@ -31,6 +32,7 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
+// Logowanie przez Google
 export const signInWithGoogle = async () => {
   const provider = new GoogleAuthProvider();
   try {
@@ -41,6 +43,17 @@ export const signInWithGoogle = async () => {
   }
 };
 
+// Logowanie anonimowe (gość)
+export const signInAsGuest = async () => {
+  try {
+    const result = await signInAnonymously(auth);
+    console.log("✅ Zalogowano anonimowo, ID:", result.user.uid);
+  } catch (error) {
+    console.error("❌ Błąd anonimowego logowania:", error);
+  }
+};
+
+// Wylogowanie
 export const logOut = async () => {
   try {
     await signOut(auth);
@@ -50,6 +63,7 @@ export const logOut = async () => {
   }
 };
 
+// Zapis użytkownika do Firestore
 export const saveUserToFirestore = async (user: User | null) => {
   if (!user) return;
   const userRef = doc(db, "users", user.uid);
@@ -58,13 +72,15 @@ export const saveUserToFirestore = async (user: User | null) => {
   if (!userSnap.exists()) {
     await setDoc(userRef, {
       uid: user.uid,
-      email: user.email,
+      email: user.email || "Anonimowy",
+      isAnonymous: user.isAnonymous,
       createdAt: serverTimestamp(),
     });
-    console.log("✅ Użytkownik zapisany w Firestore:", user.email);
+    console.log("✅ Użytkownik zapisany w Firestore:", user.uid);
   }
 };
 
+// Zapisywanie transakcji
 export const logTransaction = async (
   userId: string,
   type: "add" | "edit" | "delete",
@@ -88,6 +104,7 @@ export const logTransaction = async (
   }
 };
 
+// Nasłuchiwanie zmian stanu uwierzytelnienia
 onAuthStateChanged(auth, (user) => {
   saveUserToFirestore(user);
 });

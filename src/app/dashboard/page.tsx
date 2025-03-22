@@ -2,11 +2,11 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { auth, db } from "../../lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
-import ExpenseChart from "../../components/ExpenseChart";
-import ExpenseForm from "../../components/ExpenseForm";
-import ExpenseList from "../../components/ExpenseList/ExpenseList";
+import ExpenseChart from "@/components/ExpenseChart";
+import ExpenseForm from "@/components/ExpenseForm";
+import ExpenseList from "@/components/ExpenseList/ExpenseList";
 
 interface Expense {
   id: string;
@@ -71,38 +71,40 @@ export default function Dashboard() {
     setExpenses((prev) => [newExpense, ...prev]);
   };
 
-  const handleExpenseUpdated = (updatedExpenses: Expense[]) => {
+  const handleExpensesChanged = (updatedExpenses: Expense[]) => {
     setExpenses(updatedExpenses);
   };
 
   return (
     <div className="container mx-auto text-center p-10">
       <h1 className="text-3xl font-bold mb-4">📊 Dashboard</h1>
-      {user ? (
-        <>
-          <p className="text-lg mb-4">Witaj, {user.email}!</p>
-
-          <ExpenseForm onExpenseAdded={handleExpenseAdded} />
-          <ExpenseChart expenses={expenses} />
-
-          <div className="mt-6 text-left">
-            <h2 className="text-2xl font-bold mb-4">📝 Lista wydatków</h2>
-
-            {error && <p className="text-red-500">{error}</p>}
-
-            {loading ? (
-              <p className="text-gray-500">Ładowanie wydatków...</p>
-            ) : (
-              <ExpenseList
-                expenses={expenses || []}
-                onExpensesChanged={handleExpenseUpdated}
-              />
-            )}
-          </div>
-        </>
+      {user?.isAnonymous ? (
+        <p className="text-lg mb-4">
+          Kontynuujesz jako <strong>Gość</strong>.
+        </p>
+      ) : user ? (
+        <p className="text-lg mb-4">Witaj, {user.email}!</p>
       ) : (
         <p className="text-red-500 text-lg">⏳ Przekierowywanie...</p>
       )}
+
+      <ExpenseForm onExpenseAdded={handleExpenseAdded} />
+      <ExpenseChart expenses={expenses} />
+
+      <div className="mt-6 text-left">
+        <h2 className="text-2xl font-bold mb-4">📝 Lista wydatków</h2>
+
+        {error && <p className="text-red-500">{error}</p>}
+
+        {loading ? (
+          <p className="text-gray-500">Ładowanie wydatków...</p>
+        ) : (
+          <ExpenseList
+            expenses={expenses || []}
+            onExpensesChanged={handleExpensesChanged}
+          />
+        )}
+      </div>
     </div>
   );
 }

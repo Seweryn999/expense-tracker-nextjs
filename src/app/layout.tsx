@@ -2,7 +2,7 @@
 
 import "./globals.css";
 import Link from "next/link";
-import { auth, signInWithGoogle, logOut } from "@/lib/firebase";
+import { auth, signInWithGoogle, signInAsGuest, logOut } from "@/lib/firebase";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
@@ -56,12 +56,21 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   </button>
                 </>
               ) : (
-                <button
-                  onClick={signInWithGoogle}
-                  className="bg-blue-500 hover:bg-blue-700 transition px-4 py-2 rounded shadow"
-                >
-                  Zaloguj się
-                </button>
+                <>
+                  <button
+                    onClick={signInWithGoogle}
+                    className="bg-blue-500 hover:bg-blue-700 transition px-4 py-2 rounded shadow text-white"
+                  >
+                    Zaloguj się przez Google
+                  </button>
+
+                  <button
+                    onClick={signInAsGuest}
+                    className="bg-gray-600 hover:bg-gray-700 transition px-4 py-2 rounded shadow text-white ml-2"
+                  >
+                    Kontynuuj jako gość
+                  </button>
+                </>
               )}
             </div>
           </nav>
