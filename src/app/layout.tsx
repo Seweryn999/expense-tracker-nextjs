@@ -24,6 +24,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <html lang="pl">
       <head>
         <title>Expense Tracker</title>
+        <link rel="icon" href="/dollarSign.svg" type="image/svg+xml" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body
