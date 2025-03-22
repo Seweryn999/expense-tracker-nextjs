@@ -2,6 +2,10 @@
 
 **Expense Tracker** to aplikacja webowa umożliwiająca zarządzanie codziennymi wydatkami w prosty, szybki i przyjemny sposób. Projekt został stworzony przy użyciu nowoczesnych technologii takich jak **Next.js 14**, **Firebase**, **TypeScript** oraz **TailwindCSS**.
 
+## 🚀 **Demo aplikacji**
+
+🔗 **[LIVE DEMO](https://seweryn999.github.io/expense-tracker-nextjs/)**  
+
 ---
 
 ## 🚀 Funkcjonalności
